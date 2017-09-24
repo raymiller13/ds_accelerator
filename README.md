@@ -1,2 +1,2 @@
-# r4ds_explore_exercises
+# ds_accelerator
 Data Science Accelerator Exercises
