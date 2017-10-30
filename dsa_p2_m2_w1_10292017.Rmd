@@ -1,0 +1,98 @@
+---
+title: "dsa_p2_m2_w1_10292017"
+author: "Ray Miller"
+date: "October 28, 2017"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+#library(pdflatex)
+```
+
+## R Markdown
+####27.2.1 Exercises
+3. They are similar except that a markdown file produces a separate document after being knitted. The YAML  header seems to define the difference, since switching the headers changes the type of output produced.
+
+4. The output differs according to which file type to create. The input is the same.
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+pressure <- pressure %>% filter(temperature > 50)
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+# Ray Miller
+## 27.3.1 Exercises 1-3
+### Education: UVa **August 2012 - December 2016**  
+1. Systems Engineering Major
+2. Economics Major [^1]
+3. Computer Science Minor
+
+[^1]: The most intellectually stimulating major.
+
+that sums up my academic career. 
+
+---
+
+And now, a quote by Thomas Jefferson:
+
+>"Determine never to be idle. No person will have occasion to complain of the want of time who never loses any. It is wonderful how much may be done if we are always doing."
+
+
+#### 3. The recording or selection bias towards sizes that human use more often is obvious.
+
+---
+
+
+## 27.4.7 Exercise 1
+```{r diamonds, echo=FALSE}
+plot(diamonds$cut, diamonds$carat)
+```  
+
+```{r diamonds2, echo=FALSE}
+plot(diamonds$color, diamonds$carat)
+```  
+
+```{r diamonds3, echo=FALSE}
+plot(diamonds$clarity, diamonds$carat)
+```
+
+```{r diamonds4, echo=FALSE}
+library(tidyverse)
+diamonds %>% filter()
+```
+
+```{r diamonds5, echo=FALSE}
+top20 <- head(diamonds, n=20)
+summary(top20)
+top20
+```
+```{r diamonds6, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(scales)
+
+smaller <- diamonds %>% 
+  filter(carat <= 2.5)
+
+head(comma(smaller))
+```
