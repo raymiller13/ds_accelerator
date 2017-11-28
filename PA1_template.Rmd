@@ -1,0 +1,137 @@
+---
+title: "dsa_rr_wk_2_project"
+author: "Ray Miller"
+date: "November 28, 2017"
+output:
+  html_document:
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(gridExtra)
+library(tidyverse)
+```
+
+## Load and glimpse the data
+
+```{r chunk - Load and glimpse data}
+thedata <- read.csv("activity.csv")
+glimpse(thedata)
+```
+
+## Get rid of missing values, aggregate by day and calculate metrics
+```{r chunk - Get rid of missing values, calculate mean and median}
+cleandata <- thedata %>% 
+    filter(!is.na(steps))
+
+dailydata <- cleandata %>% 
+    group_by(date) %>% 
+    summarise(steps = sum(steps))
+
+sum(cleandata$steps)
+mean(dailydata$steps)
+median(dailydata$steps)
+
+ggplot(data = dailydata) + geom_histogram(aes(steps), bins = 10) + ggtitle("Histogram of number of steps by day with 10 bins")
+ggplot(data = dailydata) + geom_histogram(aes(steps), bins = 25) + ggtitle("Histogram of number of steps by day with 25 bins")
+```
+
+### What is mean total number of steps taken per day?  
+1. Total number of steps taken: 570608  
+2. See the histograms above with 10 and 25 bins. While the concentration changes visually depending on how many bins are used, the highest counts are seen between 10k and 15k steps.  
+3. Mean steps per day = 10766.19; Median steps taken per day = 10765  
+
+## Aggregate by interval  
+```{r chunk - Aggregate by interval}
+intervaldata <- cleandata %>% 
+    group_by(interval) %>% 
+    summarise(steps = mean(steps))
+
+ggplot(data = intervaldata) + geom_line(aes(x = interval, y = steps), lwd = 1.25, col = "dark red") + ylab("Mean steps")
+
+max(intervaldata$steps)
+
+intervaldata$interval[intervaldata$steps == max(intervaldata$steps)]
+```
+
+### What is the average daily activity pattern?
+1. See above  
+2. 8:35-8:40
+
+## Imputed data
+```{r chunk - Imputed data}
+# Number of values with NAs: 2304
+nrow(thedata) - nrow(cleandata)
+
+# Use the mean for that interval to impute the values
+imputeddata <- thedata
+
+for(n in 1:nrow(imputeddata)) {
+    
+    if(is.na(imputeddata[n, ]$steps)) {
+        imputeddata$steps[n] <- as.numeric(subset(intervaldata, interval == imputeddata$interval[n], select = steps))
+    }    
+}
+imputeddata$steps <- as.numeric(imputeddata$steps)
+
+
+# Imputed data histogram, mean, and median
+dailydata2 <- imputeddata %>% 
+    group_by(date) %>% 
+    summarise(steps = sum(steps))
+
+# Mean = same, median slightly changes, some changes seen in histogram
+mean(dailydata2$steps)
+median(dailydata2$steps)
+
+# Histograms with diff numbers of breaks (10 looks best and most days have 10-15k steps)
+ggplot(data = dailydata2) + geom_histogram(aes(steps), bins = 10)  + ggtitle("Histogram of number of steps by day with 10 bins")
+ggplot(data = dailydata2) + geom_histogram(aes(steps), bins = 25)  + ggtitle("Histogram of number of steps by day with 25 bins")
+
+```
+
+### Imputing missing values
+1. There are 2304 rows with missing values
+2. As shown in the code above, I imputed the missing step values using the mean step values for each five minute interval.  
+3. The imputeddata dataset has the missing values filled in.
+4. See the histograms above. The mean didn't change since we added values according to the mean already present. However, the median did change slightly.
+
+## Weekdays vs weekends
+```{r chunk - Weekdays vs weekends}
+# Weekdays vs weekends
+imputeddata$dow <- weekdays(as.Date(imputeddata$date))
+glimpse(imputeddata)
+
+# Iterate as before
+for(n in 1:nrow(imputeddata)) {
+    
+    if(imputeddata$dow[n] == "Saturday") {
+        imputeddata$type[n] <- "Weekend"
+    } else if(imputeddata$dow[n] == "Sunday") {
+        imputeddata$type[n] <- "Weekend"
+    } else {
+        imputeddata$type[n] <- "Weekday"
+    }
+}
+
+plot1 <- imputeddata %>% 
+    filter(type == "Weekday") %>% 
+    group_by(interval) %>% 
+    summarise(steps = mean(steps)) %>% 
+    ggplot() + geom_line(aes(x = interval, y = steps)) + ggtitle("Weekday")
+
+plot2 <- imputeddata %>% 
+    filter(type == "Weekend") %>% 
+    group_by(interval) %>% 
+    summarise(steps = mean(steps)) %>% 
+    ggplot() + geom_line(aes(x = interval, y = steps)) + ggtitle("Weekend")
+    
+grid.arrange(plot1, plot2, nrow=2, ncol=1)
+```
+
+### Are there differences in activity patterns between weekdays and weekends?
+1. The variable "type" in imputeddata indicates whether the day is on a weekday or the weekend.
+2. See the combined plot above.
+
